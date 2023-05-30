@@ -5,6 +5,7 @@ import pickle
 # import cvzone
 import numpy as np
 
+img = "./assets/train-data/trainer-mid.png"
 cap = cv2.VideoCapture('trainer.mp4')
 width = 103
 height = 43
@@ -76,7 +77,7 @@ while True:
     checkSpaces()
     # Display Output
 
-    cv2.imshow("Video Trainer", img)
+    cv2.imshow("Trainer", img)
     # cv2.imshow("ImageGray", imgThres)
     # cv2.imshow("ImageBlur", imgBlur)
     key = cv2.waitKey(1)

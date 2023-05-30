@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import Allok from './src';
+import { COLORS } from './constants';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Zaglushka</Text>
       <Allok/>
       <StatusBar style="auto" />
     </View>
@@ -15,7 +15,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#D9F1F9',
+    backgroundColor: COLORS.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
