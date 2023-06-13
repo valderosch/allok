@@ -27,28 +27,32 @@ export default Location;
 const styles = StyleSheet.create({
     main: {
         flexDirection: 'row',
-        flex: 1,
-        height: 80
+        height: 50,
+        width: 370,
+        alignSelf: 'center',
+        backgroundColor: COLORS.green,
     },
 
     locationIcon: {
         width: 35,
         height: 50,
         opacity: 1,
-        marginLeft: 10,
-        marginRight: 10,
-        marginTop: 5
+        marginLeft: 5,
+        marginRight: 5,
+        marginTop: 1,
+        backgroundColor: COLORS.red
     },
 
     textBlock: {
         flexDirection: 'column',
-        backgroundColor: COLORS.secondary,
+        backgroundColor: COLORS.primary,
+        height: 50
     },
 
     locationText: {
         color: COLORS.textSecondary,
         fontSize: SIZES.textPrimary,
-        fontWeight: '500',
+        fontWeight: '700',
         
     },
 
