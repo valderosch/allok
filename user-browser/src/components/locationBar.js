@@ -1,5 +1,5 @@
 import { View, Image, StyleSheet, Text } from "react-native";
-import { COLORS, SIZES } from "../../constants";
+import { COLORS, FONTS, SIZES } from "../../constants";
 
 const city = 'City';
 const street = 'Grand.Ave.';
@@ -7,6 +7,8 @@ const number = '23A';
 const time = '5 min ago'
 
 const Location = () => {
+
+    
     return(
         <View style={styles.main}>
             <Image
@@ -30,22 +32,19 @@ const styles = StyleSheet.create({
         height: 50,
         width: 370,
         alignSelf: 'center',
-        backgroundColor: COLORS.green,
     },
 
     locationIcon: {
-        width: 35,
-        height: 50,
+        width: 29,
+        height: 40,
         opacity: 1,
         marginLeft: 5,
         marginRight: 5,
-        marginTop: 1,
-        backgroundColor: COLORS.red
+        marginTop: 5,
     },
 
     textBlock: {
         flexDirection: 'column',
-        backgroundColor: COLORS.primary,
         height: 50
     },
 

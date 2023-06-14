@@ -1,4 +1,4 @@
-import { Button, TextInput, View, Image, StyleSheet } from "react-native"
+import { Button, TextInput, View, Image, StyleSheet, TouchableOpacity } from "react-native"
 import { COLORS, SIZES } from "../../constants";
 
 
@@ -12,10 +12,12 @@ const Searchbar = () => {
                 />
                 <TextInput placeholder="Search" style = {styles.searchBar}/>
            </View>
-            <Button 
-                title="MENU"
-                style = {styles.menuButton}
-            />
+           <TouchableOpacity>
+                    <Image
+                        style = {styles.menuButton}
+                        source = {require(`../icons/menu_btn.png`)}                
+                    />
+            </TouchableOpacity>
         </View>
     )
 }
@@ -29,7 +31,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginLeft: 5,
         marginRight: 5, 
-        marginTop: -70, 
+        marginTop: 10, 
         marginBottom: 20,
         height: 35,
         width: 350,
@@ -40,14 +42,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: COLORS.textPrimary,
         borderRadius: 22 / 2,
-        width: 280,
-
+        width: 290,
         shadowOffset: {
             width: 0,
             height: 3
           },
-          shadowRadius: 5,
-          shadowOpacity: 1.0
+        shadowRadius: 5,
+        shadowOpacity: 1.0
     },
 
     searchIcon: {
@@ -66,11 +67,8 @@ const styles = StyleSheet.create({
     },
 
     menuButton: {
-        width: 50,
-        height: 50,
-        fontSize: 50,
-        color: COLORS.black,
-        backgroundColor: COLORS.secondary,
-        border: 1,
+        width: 42,
+        height: 32,
+        marginRight: 5,
     }
 });
