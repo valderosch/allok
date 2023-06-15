@@ -4,19 +4,31 @@ import random
 import time
 from datetime import datetime
 
+def calculate_status(all, free):
+    status = 0
+    if free < all / 3:
+        status = 0
+    elif free > (all / 3) and free < (all / 1.4):
+        status = 1
+    elif free > (all / 1.4) and free <= all:
+        status = 2
+    else:
+        status = 2
+    return status
 
 def simulate_device():
     while True:
         # Data Generator
-        camera = str(random.randint(1, 15)).zfill(2)
+        camera = random.randint(1, 15)
         all_spaces = random.randint(5, 20)
         free_spaces = random.randint(0, all_spaces)
-        status = random.randint(0, 2)
+        status = calculate_status(all_spaces, free_spaces)
         updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Data structure
         data = {
-            "camera": camera,
+            "camera": f"Камера №{str(camera)}",
+            "parking": camera,
             "spaces": {
                 "all": all_spaces,
                 "free": free_spaces,
@@ -28,6 +40,8 @@ def simulate_device():
 
         # convert
         json_data = json.dumps(data)
+        with open('datas.json', 'w') as file:
+            json.dump(data, file)
         # Calling server
         url = "http://127.0.0.1:8000/save-data/"
         headers = {"Content-Type": "application/json"}
