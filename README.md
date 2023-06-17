@@ -2,6 +2,8 @@
 ## "Mobile app. Way easier!"
 This is free to use opensource app.
 
+![mobile app presentation mockup](https://github.com/valderosch/allok/blob/main/app-assset/identic/presentation.png)
+
 ## Client - React Native
 This app using WEB interface to interact with user
 
