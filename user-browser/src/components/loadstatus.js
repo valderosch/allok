@@ -1,21 +1,47 @@
 import React from "react"
-import { View, Image, StyleSheet, Text } from "react-native";
-import { COLORS, SIZES } from "../../constants";
+import { View, Image, StyleSheet, Text, Dimensions } from "react-native";
+import { COLORS } from "../../constants";
 
-export const LoadStatus = () => {
-    const load = ['light', 'middle', 'heavy' ];
-    const indication = [COLORS.green, COLORS.yellow, COLORS.red]
-    const index = 0;
+const LoadStatus = ({statuses}) => {  
+    const load = ['light', 'middle', 'heavy', 'no information' ];
+    const indication = [COLORS.green, COLORS.yellow, COLORS.red, COLORS.uactive]
     
+    const calculateMostFrequentStatus = (statuses) => {
+        const statusCount = {};
+        statuses.forEach((status) => {
+          if (statusCount[status]) {
+            statusCount[status] += 1;
+          } else {
+            statusCount[status] = 1;
+          }
+        });
+        
+        let mostFrequentStatus = null;
+        let maxCount = 0;
+        Object.entries(statusCount).forEach(([status, count]) => {
+          if (count > maxCount) {
+            mostFrequentStatus = status;
+            maxCount = count;
+          }
+        });
+        return mostFrequentStatus;
+      };
+
+
+    const loadstatus = calculateMostFrequentStatus(statuses);
+    console.log('Cередній рівень завантаженості:',load[loadstatus]);
     
+
     const styles = StyleSheet.create({
         main: {
+        position: 'absolute',
         flexDirection: 'row',
         height: 50,
-        width: 340,
+        width: '90%',
         alignSelf: 'center',
         alignItems: 'center',
-        marginTop: 140,
+        top: Dimensions.get('window').height *0.82,
+        zIndex: -1,
         },
 
         indicator_body: {
@@ -25,19 +51,20 @@ export const LoadStatus = () => {
         borderRadius: 40 / 2,
         justifyContent: 'center',
         alignItems: 'center',
-         shadowOffset: {
-            width: 5,
-            height: 3,
+        shadowColor: COLORS.black, 
+        shadowOffset: {
+          width: 0, 
+          height: 2, 
         },
-        shadowRadius: 35,
-        shadowOpacity: 1.0,
-        shadowColor: COLORS.black,
+        shadowOpacity: 0.2, 
+        shadowRadius: 4, 
+        elevation: 4, 
         },
 
         indicator_indication: {
         width: 20,
         height: 20,
-        backgroundColor: indication[index],
+        backgroundColor: indication[indication? loadstatus : 3],
         borderRadius: 25 / 2,
         },
 
@@ -54,7 +81,9 @@ export const LoadStatus = () => {
             <View style={styles.indicator_body}>
                 <View style={styles.indicator_indication}></View>
             </View>
-            <Text style={styles.indicator_text}>Average load - {load[index]}</Text>
+            <Text style={styles.indicator_text}>Average load - {load[load?loadstatus: 3]}</Text>
         </View>
     )
 }
+
+export default LoadStatus;

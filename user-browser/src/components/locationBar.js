@@ -1,13 +1,36 @@
-import { View, Image, StyleSheet, Text } from "react-native";
+import { View, Image, StyleSheet, Text, Dimensions } from "react-native";
 import { COLORS, FONTS, SIZES } from "../../constants";
+import * as Location from 'expo-location';
+import { useState } from "react";
 
 const city = 'City';
 const street = 'Grand.Ave.';
 const number = '23A';
-const time = '5 min ago'
+const time = 'now'
+const ScreenHeight = Dimensions.get('screen').height;
 
-const Location = () => {
 
+const LocationBar = ({ latitude, longitude }) => {
+    const [userAddres, setUserAdress] = useState('Street');
+    const reverseGeocode = async () => {
+        try {
+            const reversedGeocodeAddress = await Location.reverseGeocodeAsync({
+              latitude,
+              longitude,
+            });     
+            if (reversedGeocodeAddress.length > 0) {
+              const { street, streetNumber } = reversedGeocodeAddress[0];
+              const formattedAddress = `${street}, ${streetNumber}`;
+              console.log('User now at:', formattedAddress);
+              setUserAdress(formattedAddress);
+            }
+          } catch (error) {
+            console.log('Reverse geocoding error:', error);
+          }
+        
+          return '';
+    }
+    reverseGeocode(latitude, longitude);
     
     return(
         <View style={styles.main}>
@@ -16,21 +39,22 @@ const Location = () => {
                 source = {require(`../icons/location.png`)}
             />
             <View style = {styles.textBlock} >
-                <Text style={styles.locationText}>{city + '.' + street + '.' + number}</Text>
+                <Text style={styles.locationText}>{userAddres}</Text>
                 <Text style={styles.statusText}>{'last updated - ' + time }</Text>
             </View>
         </View>
     )
 } 
 
-export default Location;
+export default LocationBar;
 
 // Styles
 const styles = StyleSheet.create({
     main: {
         flexDirection: 'row',
-        height: 50,
-        width: 370,
+        height: ScreenHeight * 0.075,
+        top: ScreenHeight * 0.02,
+        width: '90%',
         alignSelf: 'center',
     },
 
@@ -39,13 +63,13 @@ const styles = StyleSheet.create({
         height: 40,
         opacity: 1,
         marginLeft: 5,
-        marginRight: 5,
+        marginRight: 15,
         marginTop: 5,
     },
 
     textBlock: {
         flexDirection: 'column',
-        height: 50
+        height: ScreenHeight *0.075
     },
 
     locationText: {

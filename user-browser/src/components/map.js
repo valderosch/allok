@@ -1,100 +1,313 @@
-import { View, StyleSheet, Button, Image, TouchableOpacity, Dimensions } from "react-native"
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Image, TouchableOpacity,Text, TouchableWithoutFeedback, Animated, Dimensions } from "react-native"
 import { COLORS } from "../../constants";
-import MapView from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
+import MarkerInfo from './markerinfo';
+import Measure from './measure';
+import LocationBar from './locationBar';
+import LoadStatus from './loadstatus';
+import * as Location from 'expo-location';
+import { decode } from "@mapbox/polyline";
+import {apiKey} from './app-info'
+import axios from 'axios';
 
 
+//Default consts
 const LAT = 48.268591;
 const LON = 25.929677;
-const DLAT = 0.004;
-const DLON = 0.005;
-// block user scroll and area of view. REFRESH
-const Map = () => {
-    return(
-        <View style = {styles.main}>
+const DLAT = 0.007;
+const DLON = 0.008;
+const mapSettings = require('../../map-settings.json');
+const colors = [COLORS.green, COLORS.yellow, COLORS.red, COLORS.uactive]
+const ScreenHeight = Dimensions.get('screen').height;
+const PORT2 = '10.0.2.2';
+const PORT = '192.168.0.110';
+
+//block user scroll , REDUX and Component MapBOX 
+const MapBox = () => {
+    const [currentLocation, setCurrentLocation] = useState(null);
+    const [markers, setMarkers] = useState([]);
+    const [routeData, setRouteData] = useState(null);
+    const [selectedMarker, setSelectedMarker] = useState(null);
+    const [showRoute, setShowRoute] = useState(false);
+    const [searchDistance, setSearchDistance] = useState(750);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [region, setRegion] = useState({
+        latitude: LAT,
+        longitude: LON,
+        latitudeDelta: DLAT,
+        longitudeDelta: DLON,
+    });
+    
+    // init component
+    useEffect(() => {
+        fetchMarkers();
+      }, []);
+
+    // check location
+    useEffect(() => {
+        const getLocation = async () => {
+            try {
+              const { status } = await Location.requestForegroundPermissionsAsync();
+              if (status !== 'granted') {
+                console.log('Location permission not granted');
+                return;
+              }
+      
+              Location.watchPositionAsync(
+                {
+                  accuracy: Location.Accuracy.High,
+                  timeInterval: 1500,
+                  distanceInterval: 10,
+                },
+                (location) => {
+                  setCurrentLocation(location.coords);
+                  updateRegion(location.coords);
+                }
+              );
+            } catch (error) {
+              console.log('Error getting location:', error);
+            }
+          };
+          getLocation();
+    }, []);
+
+    const updateRegion = (coords) => {
+        setRegion({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          latitudeDelta: DLAT,
+          longitudeDelta: DLON,
+        });
+    };
+    
+    // Load markers from server
+    const fetchMarkers = async () => {
+        try {
+            const response = await axios.get(`http://${PORT}:8000/parking-points/`);
+            const data = await response.data;
+            setMarkers(data);
+        } catch (error) {
+            console.warn('Markers | GET Request Error:', error);
+        }
+    };
+
+    //Marker Data binding from server
+    const handleMarkerPress = async (markerId, markerLatitude, markerLongitude) => {
+        try {
+            const response = await axios.get(`http://${PORT}:8000/api/parking-points/${markerId}/point-data/`);
+            const data = response.data;
+            const currentMarker = {
+                ...data,
+                latitude: markerLatitude,
+                longitude: markerLongitude
+            };
+            setSelectedMarker(currentMarker);
+        } catch (error) {
+            console.warn('GET Request Error:', error);
+        }
+    };
+
+    //Clean screen
+    const handleOutsidePress = () => {
+      setSelectedMarker(null);
+      setShowRoute(false);
+    };
+
+    // Routes Visibility
+    const handleShowRoute = async () => {
+      try {
+        const response = await axios.get(
+          `https://maps.googleapis.com/maps/api/directions/json?origin=${currentLocation.latitude},${currentLocation.longitude}&destination=${selectedMarker.latitude},${selectedMarker.longitude}&key=${apiKey}`
+        );
+        const data = response.data;
+        setRouteData(data);
+        setShowRoute(true);
+        console.log("ROUTE | Getting info ", data);
+        return data;
+      } catch (error) {
+        console.log('Error getting directions:', error);
+        return null;
+      }
+    };
+    // Decode Route Daata
+    function decodePolyline(polyline) {
+      return decode(polyline);
+    }
+
+    // MeasureModal
+    const toggleModal = (value) => {
+      console.log("Зміна стану модального вікна");
+      setModalVisible(!modalVisible);
+      setSearchDistance(value);
+    };
+    // DYnamic styles
+    const map_styles = StyleSheet.create({
+        mapBox: {
+            flex: 1,
+            width: "100%",
+            height: 450,
+        },
+        
+        marker: {
+            width: 25,
+            height: 25,
+            backgroundColor: colors[selectedMarker ? selectedMarker.status : 3],
+            borderRadius: 15 /2,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            shadowColor: COLORS.black,
+            shadowOffset: {
+                width: 0, 
+                height: 2, 
+                },
+            shadowOpacity: 0.2, 
+            shadowRadius: 4, 
+            elevation: 4, 
+        },
+        
+        markerText: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: COLORS.white
+        },
+      })
+  
+    
+  return (
+    <TouchableWithoutFeedback onPress={handleOutsidePress}>
+        <View style={styles.main}>
+        <LocationBar 
+                latitude={currentLocation?.latitude}
+                longitude={currentLocation?.longitude}
+            />
             <View style={styles.mapview}>
-                <MapView style={styles.map}
+                <MapView style={map_styles.mapBox}
+                    customMapStyle={mapSettings} 
                     showsUserLocation
                     followsUserLocation
-                    initialRegion={{
-                        latitude: LAT,
-                        longitude: LON,
-                        latitudeDelta: DLAT,
-                        longitudeDelta: DLON,
-                    }}
-                />
-                <View style = {styles.buttons}>
-                <TouchableOpacity>
-                    <Image
-                        style = {styles.measureButton}
-                        source = {require(`../icons/rangeButton.png`)}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Image
-                        style = {styles.searchButton}
-                        source = {require(`../icons/ParkButton.png`)}                
-                    />
-                </TouchableOpacity>
-                </View>
+                    region={region}>
+                    {markers.map(marker => (
+                        <Marker
+                        key={marker.id}
+                        coordinate={{
+                            latitude: marker.latitude,
+                            longitude: marker.longitude
+                        }}
+                        onPress={() => handleMarkerPress(marker.id, marker.latitude, marker.longitude)}>
+                        <View style={[map_styles.marker, { backgroundColor: marker? colors[marker.status] : colors[3] }]}>
+                            <Text style={map_styles.markerText}>P</Text>
+                        </View>
+                        </Marker>
+                    ))}
+                    {showRoute && routeData && (
+                        <Polyline
+                        coordinates={decodePolyline(routeData.routes[0].overview_polyline.points).map(point => ({
+                          latitude: point[0],
+                          longitude: point[1],
+                        }))}
+                          strokeWidth={4}
+                          strokeColor={COLORS.blue}
+                        />
+                        )}
+                </MapView>
+                <TouchableOpacity style={styles.button1} onPress={() =>toggleModal(searchDistance)}>
+                        <Image
+                        style={styles.measureButton}
+                        source={require(`../icons/rangeButton.png`)}
+                        />
+                  </TouchableOpacity>
+                  <TouchableOpacity style = {styles.button2}>
+                        <Image
+                        style={styles.searchButton}
+                        source={require(`../icons/ParkButton.png`)}
+                        />
+                  </TouchableOpacity>
+                  <Measure
+                    searchDistance={searchDistance}
+                    toggleModal={toggleModal}
+                    modalVisible={modalVisible}
+                  />
+                    {selectedMarker && (
+                        <MarkerInfo
+                            selectedMarker={selectedMarker}
+                            latitude={selectedMarker.latitude}
+                            longitude={selectedMarker.longitude}
+                            allSpaces={selectedMarker.all_spaces}
+                            freeSpaces={selectedMarker.free_spaces}
+                            status={selectedMarker.status}
+                            updatedAt={selectedMarker.updated_at}
+                            onShowRoute={handleShowRoute}
+                        />
+                    )}
             </View>
-           
+            <LoadStatus statuses={markers.map((marker) => marker.status)} />
         </View>
-    )
+    </TouchableWithoutFeedback>
+  )
 }
 
-export default Map; 
+export default MapBox;
 
 const styles = StyleSheet.create({
-    main: {
-        flexDirection: 'column',
-        marginLeft: 5,
-        marginRight: 5,
-        marginTop: 20,
-        marginBottom: 90,
-        width: 370,
-        height:250,
-        backgroundColor: COLORS.backgroundColor
-    },
+  main: {
+    flexDirection: 'column',
+    marginBottom: 90,
+    width: '100%',
+    height: ScreenHeight * 0.75,
+    top: 0,
+    alignSelf: 'center',
+    backgroundColor: COLORS.backgroundColor
+  },
 
-    mapview: {
-        flex: 1,
-        backgroundColor: COLORS.blue,
-        justifyContent: 'center',
-        minWidth: '50%',
-        minHeight: '70%',
-        height: 200,
-        backgroundColor: COLORS.white,
-        borderRadius: 30/2
-    },
+  mapview: {
+    flex: 1,
+    backgroundColor: COLORS.blue,
+    justifyContent: 'center',
+    minWidth: '50%',
+    minHeight: '70%',
+    width: '100%',
+    top: 10,
+    height: ScreenHeight * 0.5,
+    backgroundColor: COLORS.white,
+  },
 
-    map: {
-        flex: 1,
-        width: "100%",
-        height: 200, 
-    },
 
-    buttons: {
-        width: "95%",
-        height: "18%",
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: "space-between",
-        position: 'absolute',
-        top: 370,
-        left: 10,
-    },
+  buttons: {
+    width: "95%",
+    height: "18%",
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: "space-between",
+    position: 'absolute',
+    top: 370,
+    left: 10,
+  },
 
-    measureButton: {
-        width: 55,
-        height: 55,
-        marginTop: 15,
-        alignSelf: 'center',
-    },
+  button1: {
+    position: 'absolute',
+    left: 20,
+    bottom: 10,
+    zIndex: 3,
+  },
 
-    searchButton: {
-        width: 70,
-        height: 70,
-        alignSelf: 'center',
-        borderRadius: 100/2,
-    }
+  measureButton: {
+    width: 55,
+    height: 55,
+  },
+
+  button2: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20
+ },
+
+  searchButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 100 / 2,
+  },
 });
+
+

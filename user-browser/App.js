@@ -1,12 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import Allok from './src';
+import { StyleSheet, View } from 'react-native';
 import { COLORS } from './constants';
+import Allok from './src';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Allok/>
+      <Allok />
       <StatusBar style="auto" />
     </View>
   );

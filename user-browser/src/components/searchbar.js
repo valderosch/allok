@@ -1,7 +1,7 @@
-import { Button, TextInput, View, Image, StyleSheet, TouchableOpacity } from "react-native"
+import { Button, TextInput, View, Image, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
 import { COLORS, SIZES } from "../../constants";
 
-
+const ScreenHeight = Dimensions.get('window').height;
 const Searchbar = () => {
     return(
         <View style={styles.main}>
@@ -27,22 +27,22 @@ export default Searchbar;
 
 const styles = StyleSheet.create({
     main: {
+        alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginLeft: 5,
-        marginRight: 5, 
-        marginTop: 10, 
-        marginBottom: 20,
-        height: 35,
-        width: 350,
-        
+        alignItems: 'center',
+        height: ScreenHeight * 0.08,
+        width: '90%',
+        position: 'absolute',
+        bottom: 0,
+        zIndex: -1       
     },
 
     subBlock: {
         flexDirection: 'row',
         backgroundColor: COLORS.textPrimary,
         borderRadius: 22 / 2,
-        width: 290,
+        width: '84%',
         shadowOffset: {
             width: 0,
             height: 3
@@ -62,7 +62,8 @@ const styles = StyleSheet.create({
 
     searchBar: {
         fontSize: 23,
-        fontWeight: '300',
+        fontWeight: '400',
+        width: '80%',
         color: COLORS.textMuted,
     },
 
