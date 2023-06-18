@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myapp
+  name: allok
 spec:
   selector:
     matchLabels:
-      app: myapp
+      app: allok
   template:
     metadata:
       labels:
-        app: myapp
+        app: allok
     spec:
       containers:
-      - name: myapp
+      - name: allok
         image: <Image>
         resources:
           limits:
