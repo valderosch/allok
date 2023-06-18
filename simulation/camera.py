@@ -57,7 +57,7 @@ def simulate_device():
                   f"CODE: {response.status_code} / {response.reason}")
 
         # Iteration freeze
-        time.sleep(60) # seconds
+        time.sleep(30) # seconds
 
 
 # Call main func
