@@ -1,9 +1,14 @@
 from django.contrib import admin
-from .models import ParkingPoint
+from .models import ParkingPoint, CameraData
+
 
 # parking point register
 class ParkingPointAdmin(admin.ModelAdmin):
     pass
 
+class CameraDataAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(ParkingPoint, ParkingPointAdmin)
-# Register your models here.
+admin.site.register(CameraData, CameraDataAdmin)
+

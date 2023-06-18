@@ -1,16 +1,8 @@
+from .models import ParkingPoint, CameraData
 from rest_framework import serializers
-from .models import Point, ParkingPoint, CameraData
-from django.contrib.gis import geos
-from django.contrib.gis.measure import Distance
-from rest_framework import serializers, generics
 
 
-class PointSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Point
-        fields = '__all__'
-
-
+# ParkingPoint
 class ParkingPointSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
 
@@ -25,25 +17,9 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         model = ParkingPoint
         fields = ['id', 'title', 'latitude', 'longitude', 'status']
 
+
+# Selected Point
 class CurrentPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = CameraData
         fields = '__all__'
-
-# ROUTING
-
-class RouteSerializer(serializers.Serializer):
-    user_latitude = serializers.FloatField()
-    user_longitude = serializers.FloatField()
-    point_latitude = serializers.FloatField()
-    point_longitude = serializers.FloatField()
-    speed = serializers.FloatField()
-
-
-class RouteDistanceSerializer(serializers.Serializer):
-    route_length = serializers.FloatField()
-
-
-
-
-
