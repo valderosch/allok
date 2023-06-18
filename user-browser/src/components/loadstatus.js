@@ -3,7 +3,7 @@ import { View, Image, StyleSheet, Text, Dimensions } from "react-native";
 import { COLORS } from "../../constants";
 
 const LoadStatus = ({statuses}) => {  
-    const load = ['light', 'middle', 'heavy', 'no information' ];
+    const load = ['легкий', 'середній', 'сильний', 'no information' ];
     const indication = [COLORS.green, COLORS.yellow, COLORS.red, COLORS.uactive]
     
     const calculateMostFrequentStatus = (statuses) => {
@@ -81,7 +81,7 @@ const LoadStatus = ({statuses}) => {
             <View style={styles.indicator_body}>
                 <View style={styles.indicator_indication}></View>
             </View>
-            <Text style={styles.indicator_text}>Average load - {load[load?loadstatus: 3]}</Text>
+            <Text style={styles.indicator_text}>Рівень завантаження - {load[load?loadstatus: 3]}</Text>
         </View>
     )
 }

@@ -6,7 +6,7 @@ import { useState } from "react";
 const city = 'City';
 const street = 'Grand.Ave.';
 const number = '23A';
-const time = 'now'
+const time = 'зараз'
 const ScreenHeight = Dimensions.get('screen').height;
 
 
@@ -20,7 +20,7 @@ const LocationBar = ({ latitude, longitude }) => {
             });     
             if (reversedGeocodeAddress.length > 0) {
               const { street, streetNumber } = reversedGeocodeAddress[0];
-              const formattedAddress = `${street}, ${streetNumber}`;
+              const formattedAddress = `${street? street : 'on Street'}, ${streetNumber? streetNumber : ''}`;
               console.log('User now at:', formattedAddress);
               setUserAdress(formattedAddress);
             }
@@ -40,7 +40,7 @@ const LocationBar = ({ latitude, longitude }) => {
             />
             <View style = {styles.textBlock} >
                 <Text style={styles.locationText}>{userAddres}</Text>
-                <Text style={styles.statusText}>{'last updated - ' + time }</Text>
+                <Text style={styles.statusText}>{'Оновлено - ' + time }</Text>
             </View>
         </View>
     )

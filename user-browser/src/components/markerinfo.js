@@ -32,7 +32,7 @@ const MarkerInfo = ({ latitude, longitude, allSpaces, freeSpaces, status, update
             });     
             if (reversedGeocodeAddress.length > 0) {
               const { street, streetNumber } = reversedGeocodeAddress[0];
-              const formattedAddress = `${street}, ${streetNumber}`;
+              const formattedAddress = `${street? street : 'Not located at the street'} ${streetNumber? streetNumber: ''}`;
               console.log('Picked:', formattedAddress);
               setPointAdress(formattedAddress);
             }
@@ -70,14 +70,14 @@ const MarkerInfo = ({ latitude, longitude, allSpaces, freeSpaces, status, update
             </View>
             <View style = {styles.content}>
                 <View style = {styles.text_block}>
-                    <Text style={styles.point_info}>load status: {statuses[status]}</Text>
-                    <Text style={styles.point_info}>free: {freeSpaces} / {allSpaces}</Text>
-                    <Text style={styles.point_info}>distance: 1.2 km</Text>
-                    <Text style={styles.point_info}>travel time : 28 min</Text>
+                    <Text style={styles.point_info}>load status : {statuses[status]}</Text>
+                    <Text style={styles.point_info}>free : {freeSpaces} / {allSpaces}</Text>
+                    <Text style={styles.point_info}>opened : yes</Text>
+                    <Text style={styles.point_info}>closes at : 22:00</Text>
                 </View>
                 <View style = {styles.right}>
                     <Text style = {styles.updated}>{responce}</Text>
-                    <TouchableOpacity style={styles.button} onPress={() => onShowRoute()}>
+                    <TouchableOpacity style={styles.button} onPress={() => onShowRoute(latitude, longitude)}>
                         <View style = {styles.pin}>
                             <View style = {styles.pin_head}></View>
                             <View style = {styles.pin_body}></View>
