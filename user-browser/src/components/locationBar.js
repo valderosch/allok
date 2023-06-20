@@ -3,9 +3,6 @@ import { COLORS, FONTS, SIZES } from "../../constants";
 import * as Location from 'expo-location';
 import { useState } from "react";
 
-const city = 'City';
-const street = 'Grand.Ave.';
-const number = '23A';
 const time = 'зараз'
 const ScreenHeight = Dimensions.get('screen').height;
 
@@ -20,7 +17,7 @@ const LocationBar = ({ latitude, longitude }) => {
             });     
             if (reversedGeocodeAddress.length > 0) {
               const { street, streetNumber } = reversedGeocodeAddress[0];
-              const formattedAddress = `${street? street : 'on Street'}, ${streetNumber? streetNumber : ''}`;
+              const formattedAddress = `${street? street : 'Not located at the street'} ${streetNumber? streetNumber : ''}`;
               console.log('User now at:', formattedAddress);
               setUserAdress(formattedAddress);
             }

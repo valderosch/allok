@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity,Text, TouchableWithoutFeedback, Animated, Dimensions } from "react-native"
+import { View, StyleSheet, Image, TouchableOpacity,Text, TouchableWithoutFeedback, Dimensions } from "react-native"
 import { COLORS } from "../../constants";
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import MarkerInfo from './markerinfo';
@@ -7,6 +7,7 @@ import Measure from './measure';
 import RouteInfo from './route-info';
 import LocationBar from './locationBar';
 import LoadStatus from './loadstatus';
+import RefreshAll from './refresh';
 import * as Location from 'expo-location';
 import { Alert, Linking } from 'react-native';
 import { decode } from "@mapbox/polyline";
@@ -37,6 +38,7 @@ const MapBox = () => {
   const [searchDistance, setSearchDistance] = useState(2);
   const [noParkingMessage, setNoParkingMessage] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [region, setRegion] = useState({
     latitude: LAT,
     longitude: LON,
@@ -51,31 +53,32 @@ const MapBox = () => {
 
     // check location
   useEffect(() => {
-      const getLocation = async () => {
-          try {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-              console.log('Location permission not granted');
-              return;
-            }
-    
-            Location.watchPositionAsync(
-              {
-                accuracy: Location.Accuracy.High,
-                timeInterval: 1500,
-                distanceInterval: 10,
-              },
-              (location) => {
-                setCurrentLocation(location.coords);
-                updateRegion(location.coords);
-              }
-            );
-          } catch (error) {
-            console.log('Error getting location:', error);
-          }
-        };
         getLocation();
   }, []);
+
+  const getLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission not granted');
+        return;
+      }
+
+      Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 1500,
+          distanceInterval: 10,
+        },
+        (location) => {
+          setCurrentLocation(location.coords);
+          updateRegion(location.coords);
+        }
+      );
+    } catch (error) {
+      console.log('Error getting location:', error);
+    }
+  };
 
   const updateRegion = (coords) => {
       setRegion({
@@ -86,6 +89,12 @@ const MapBox = () => {
       });
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchMarkers();
+    getLocation();
+    setRefreshing(false);
+  };
     
     // Load markers from server
   const fetchMarkers = async () => {
@@ -207,97 +216,105 @@ const MapBox = () => {
             fontWeight: '700',
             color: COLORS.white
         },
-      })
+    })
   
     
   return (
     <TouchableWithoutFeedback onPress={handleOutsidePress}>
-        <View style={styles.main}>
-        <LocationBar 
-                latitude={currentLocation?.latitude}
-                longitude={currentLocation?.longitude}
-            />
-            <View style={styles.mapview}>
-                <MapView style={map_styles.mapBox}
-                    customMapStyle={mapSettings} 
-                    showsUserLocation
-                    followsUserLocation
-                    region={region}>
-                    {markers.map(marker => (
-                        <Marker
-                        key={marker.id}
-                        coordinate={{
-                            latitude: marker.latitude,
-                            longitude: marker.longitude
-                        }}
-                        onPress={() => handleMarkerPress(marker.id, marker.latitude, marker.longitude)}
-                        >
-                        <View style={[map_styles.marker, { backgroundColor: marker? colors[marker.status] : colors[3] }]}>
-                            <Text style={map_styles.markerText}>P</Text>
-                        </View>
-                        </Marker>
-                    ))}
-                    {showRoute && routeData && (
-                        <Polyline
-                        coordinates={decodePolyline(routeData.routes[0].overview_polyline.points).map(point => ({
-                          latitude: point[0],
-                          longitude: point[1],
-                        }))}
-                          strokeWidth={4}
-                          strokeColor={COLORS.blue}
-                        />
-                        )}
-                </MapView>
-                {showRoute && (
-                  <RouteInfo routeData={routeData} onCancelRoute={handleCancelRoute} />
-                )}
-                <TouchableOpacity activeOpacity={1.0} style={styles.button1} onPress={() =>toggleModal(searchDistance)}>
-                        <Image
-                        style={styles.measureButton}
-                        source={require(`../icons/rangeButton.png`)}
-                        />
-                  </TouchableOpacity>
-                  <TouchableOpacity activeOpacity={1.0} style = {styles.button2} onPress={handleSearchButtonPress}>
-                        <Image
-                        style={styles.searchButton}
-                        source={require(`../icons/ParkButton.png`)}
-                        />
-                  </TouchableOpacity>
-                  {/* Повідомлення */}
-                  {noParkingMessage ? (
-                    <View style={styles.noParkingMessage}>
-                      <Text style ={styles.noParkingTitle}>{noParkingMessage}</Text>
-                      <Text style = {styles.noParkingSubTitle}>Спробуйте збільшити область видимості 👀</Text>
-                      <Text style = {styles.noParkingTitle}>OK</Text>
-                    </View>
-                  ) : null}
-                  <Measure
-                    searchDistance={searchDistance}
-                    toggleModal={toggleModal}
-                    modalVisible={modalVisible}
-                  />
-                    {selectedMarker && (
-                        <MarkerInfo
-                            selectedMarker={selectedMarker}
-                            latitude={selectedMarker.latitude}
-                            longitude={selectedMarker.longitude}
-                            allSpaces={selectedMarker.all_spaces}
-                            freeSpaces={selectedMarker.free_spaces}
-                            status={selectedMarker.status}
-                            updatedAt={selectedMarker.updated_at}
-                            onShowRoute={handleShowRoute}
-                        />
-                    )}
-            </View>
-            <LoadStatus statuses={markers.map((marker) => marker.status)} />
-        </View>
-    </TouchableWithoutFeedback>
+          <View style={styles.main}>
+          <LocationBar 
+                  latitude={currentLocation?.latitude}
+                  longitude={currentLocation?.longitude}
+              />
+              <View style={styles.mapview}>
+                  <MapView style={map_styles.mapBox}
+                      customMapStyle={mapSettings} 
+                      showsUserLocation
+                      followsUserLocation
+                      region={region}>
+                      {markers.map(marker => (
+                          <Marker
+                          key={marker.id}
+                          coordinate={{
+                              latitude: marker.latitude,
+                              longitude: marker.longitude
+                          }}
+                          onPress={() => handleMarkerPress(marker.id, marker.latitude, marker.longitude)}
+                          >
+                          <View style={[map_styles.marker, { backgroundColor: marker? colors[marker.status] : colors[3] }]}>
+                              <Text style={map_styles.markerText}>P</Text>
+                          </View>
+                          </Marker>
+                      ))}
+                      {showRoute && routeData && (
+                          <Polyline
+                          coordinates={decodePolyline(routeData.routes[0].overview_polyline.points).map(point => ({
+                            latitude: point[0],
+                            longitude: point[1],
+                          }))}
+                            strokeWidth={4}
+                            strokeColor={COLORS.blue}
+                          />
+                          )}
+                  </MapView>
+                  {showRoute && (
+                    <RouteInfo routeData={routeData} onCancelRoute={handleCancelRoute} />
+                  )}
+                  <TouchableOpacity activeOpacity={1.0} style={styles.button1} onPress={() =>toggleModal(searchDistance)}>
+                          <Image
+                          style={styles.measureButton}
+                          source={require(`../icons/rangeButton.png`)}
+                          />
+                    </TouchableOpacity>
+                    <TouchableOpacity activeOpacity={1.0} style = {styles.button2} onPress={handleSearchButtonPress}>
+                          <Image
+                          style={styles.searchButton}
+                          source={require(`../icons/ParkButton.png`)}
+                          />
+                    </TouchableOpacity>
+                    {/* Повідомлення */}
+                    {noParkingMessage ? (
+                      <View style={styles.noParkingMessage}>
+                        <Text style ={styles.noParkingTitle}>{noParkingMessage}</Text>
+                        <Text style = {styles.noParkingSubTitle}>Спробуйте збільшити область видимості 👀</Text>
+                        <Text style = {styles.noParkingTitle}>OK</Text>
+                      </View>
+                    ) : null}
+                    <Measure
+                      searchDistance={searchDistance}
+                      toggleModal={toggleModal}
+                      modalVisible={modalVisible}
+                    />
+                      {selectedMarker && (
+                          <MarkerInfo
+                              selectedMarker={selectedMarker}
+                              latitude={selectedMarker.latitude}
+                              longitude={selectedMarker.longitude}
+                              allSpaces={selectedMarker.all_spaces}
+                              freeSpaces={selectedMarker.free_spaces}
+                              status={selectedMarker.status}
+                              updatedAt={selectedMarker.updated_at}
+                              onShowRoute={handleShowRoute}
+                          />
+                      )}
+              </View>
+              <LoadStatus statuses={markers.map((marker) => marker.status)} />
+              <RefreshAll onRefresh={onRefresh} />
+          </View>
+      </TouchableWithoutFeedback>
   )
 }
 
 export default MapBox;
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+
   main: {
     flexDirection: 'column',
     marginBottom: 90,

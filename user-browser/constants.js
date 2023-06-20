@@ -14,7 +14,10 @@ export const COLORS = {
     blue: "#5A99E2",
     textPrimary: "#F2F2F2",
     textSecondary: "#2F2F2F",
-    textMuted: "#838383", 
+    textMuted: "#838383",
+    transparent: 'rgba(0, 0, 0, 0)',
+    halfblacked: 'rgba(0, 0, 0, 0.6)',
+    halfwhited: 'rgba(255, 255, 255, 1)',
 }
 
 export const SIZES = {
