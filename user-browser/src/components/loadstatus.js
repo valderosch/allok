@@ -1,5 +1,5 @@
 import React from "react"
-import { View, Image, StyleSheet, Text, Dimensions } from "react-native";
+import { View,  StyleSheet, Text, Dimensions } from "react-native";
 import { COLORS } from "../../constants";
 
 const LoadStatus = ({statuses}) => {  

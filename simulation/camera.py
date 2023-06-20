@@ -17,6 +17,9 @@ def calculate_status(all, free):
     return status
 
 def simulate_device():
+    max_failures = 50
+    failure_count = 0
+
     while True:
         # Data Generator
         camera = random.randint(1, 15)
@@ -27,7 +30,7 @@ def simulate_device():
 
         # port specificator
         PORT = '192.168.0.110'
-        PORT2 = '127.0.0.1'
+
         # Data structure
         data = {
             "camera": f"Камера №{str(camera)}",
@@ -45,19 +48,29 @@ def simulate_device():
         json_data = json.dumps(data)
 
         # Calling server
-        url = f"http://{PORT}:8000/save-data/"
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(url, data=json_data, headers=headers)
+        try:
+            url = f"http://{PORT}:8000/save-data/"
+            headers = {"Content-Type": "application/json"}
+            response = requests.post(url, data=json_data, headers=headers)
 
-        # checking status
-        if response.status_code == 200:
-            print("Дані відправлено успішно!")
-        else:
-            print(f"Помилка під час відправки даних.\n"
-                  f"CODE: {response.status_code} / {response.reason}")
+            # checking status
+            if response.status_code == 200:
+                print("Дані відправлено успішно!")
+                failure_count = 0
+            else:
+                print(f"Помилка під час відправки даних.\n"
+                      f"CODE: {response.status_code} / {response.reason}")
+                failure_count += 1  # збільшуємо лічильник невдалих запитів
+        except requests.exceptions.RequestException as e:
+            print(f"Request Error: {e}")
+            failure_count += 1
+
+        if failure_count >= max_failures:
+            print(f"Досягнуто максимальну кількість невдалих запитів ({max_failures}). Зупинка системи.")
+            break
 
         # Iteration freeze
-        time.sleep(30) # seconds
+        time.sleep(360)  # seconds
 
 
 # Call main func

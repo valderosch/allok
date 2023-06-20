@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { COLORS } from '../../constants';
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import * as Location from 'expo-location';
 import moment from 'moment';
 
